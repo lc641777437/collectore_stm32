@@ -2,7 +2,7 @@
 #include "delay.h"
 #include "usart.h"
 #include "ads1258.h"
-#include "initstate.h"
+#include "device_state.h"
 #include "timer.h"
 
 
@@ -42,18 +42,19 @@ ErrorStatus RTC_Set_Date(u8 year,u8 month,u8 date,u8 week)
     return RTC_SetDate(RTC_Format_BIN,&RTC_DateTypeInitStructure);
 }
 
-    //RTC初始化
-    //返回值:0,初始化成功;
-    //       1,LSE开启失败;
-    //       2,进入初始化模式失败;
+//RTC初始化
+//返回值:0,初始化成功;
+//       1,LSE开启失败;
+//       2,进入初始化模式失败;
 u8 My_RTC_Init(void)
 {
+    u16 retry = 0X1FFF;
     RTC_InitTypeDef RTC_InitStructure;
-    u16 retry=0X1FFF;
+
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);//使能PWR时钟
     PWR_BackupAccessCmd(ENABLE);	//使能后备寄存器访问
 
-    if(RTC_ReadBackupRegister(RTC_BKP_DR0)!=0x5050)		//是否第一次配置?
+    if(RTC_ReadBackupRegister(RTC_BKP_DR0) != 0x5050)		//是否第一次配置?
     {
         RCC_LSEConfig(RCC_LSE_ON);//LSE 开启
         while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET)	//检查指定的RCC标志位设置与否,等待低速晶振就绪
@@ -74,7 +75,7 @@ u8 My_RTC_Init(void)
         RTC_Set_Time(21,15,56,RTC_H12_AM);	//设置时间
         RTC_Set_Date(16,7,27,3);		//设置日期
 
-        RTC_WriteBackupRegister(RTC_BKP_DR0,0x5050);	//标记已经初始化过了
+        RTC_WriteBackupRegister(RTC_BKP_DR0, 0x5050);	//标记已经初始化过了
     }
 
     return 0;
@@ -183,7 +184,6 @@ void RTC_WKUP_IRQHandler(void)
 		RTC_ClearFlag(RTC_FLAG_WUTF);	//清除中断标志
         if(get_DeviceState(DEVICE_ETH) == ON)
         {
-            ad_Data_Proc();
         }
 	}
 	EXTI_ClearITPendingBit(EXTI_Line22);//清除中断线22的中断标志

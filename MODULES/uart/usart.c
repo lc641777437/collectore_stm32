@@ -3,13 +3,13 @@
 #include "stmflash.h"
 #include "ads1258.h"
 #include "stmflash.h"
-#include "initstate.h"
+#include "device_state.h"
 #include "exti.h"
 
 
 #define USART_MAX_RECV_LEN 256
 
-static u8 printf_state;
+static u8 printf_channel;
 static u8 data_Count;
 
 static u16 USART3_RX_STA = 0;//接收状态标记
@@ -33,7 +33,7 @@ FILE __stdout;
 //重定义fputc函数
 int fputc(int ch, FILE *f)
 {
-    switch(printf_state)
+    switch(printf_channel)
     {
         case 1:
             while(USART_GetFlagStatus(USART1,USART_FLAG_TC) == RESET);
@@ -56,7 +56,7 @@ int fputc(int ch, FILE *f)
 
 void select_USART(u8 channel)
 {
-	printf_state = channel;
+	printf_channel = channel;
 }
 
 void USART1_Configuration(void)
@@ -68,8 +68,8 @@ void USART1_Configuration(void)
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
 
-    GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_USART1);
-    GPIO_PinAFConfig(GPIOB,GPIO_PinSource7,GPIO_AF_USART1);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_USART1);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource7, GPIO_AF_USART1);
 
     gpio.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
     gpio.GPIO_Mode = GPIO_Mode_AF;
@@ -82,7 +82,7 @@ void USART1_Configuration(void)
     usart1.USART_WordLength = USART_WordLength_8b;
     usart1.USART_StopBits = USART_StopBits_1;
     usart1.USART_Parity = USART_Parity_No;
-    usart1.USART_Mode = USART_Mode_Tx|USART_Mode_Rx;
+    usart1.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     usart1.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_Init(USART1,&usart1);
 
@@ -172,11 +172,12 @@ void USART1_IRQHandler(void)
             }
         }
     }
-    if( USART_GetITStatus(USART1, USART_IT_TXE) == SET  )
+
+    if( USART_GetITStatus(USART1, USART_IT_TXE) == SET )
     {
-        if( data_Count>51 )
+        if( data_Count > 51 )
         {
-            data_Count=0;
+            data_Count = 0;
             USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
         }
         else
@@ -186,9 +187,6 @@ void USART1_IRQHandler(void)
         }
     }
 }
-
-
-
 
 
 
@@ -228,12 +226,12 @@ void USART2_Configuration(void)
     nvic.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic);
 }
+
 void USART2_proc()
 {
-    send_USART2("%s",USART2_RX_BUF);
     USART2_RX_STA = 0;
+    send_USART2("%s",USART2_RX_BUF);
     memset(USART2_RX_BUF,'\0',strlen((const char*)USART2_RX_BUF));
-    return;
 }
 
 void USART2_RECV_Timeout(void)
@@ -279,9 +277,6 @@ void USART2_IRQHandler(void)
 
 
 
-
-
-
 void USART3_Configuration(void)
 {
     USART_InitTypeDef usart3;
@@ -299,7 +294,7 @@ void USART3_Configuration(void)
     gpio.GPIO_OType = GPIO_OType_PP;
     gpio.GPIO_Speed = GPIO_Speed_50MHz;
     gpio.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_Init(GPIOB,&gpio);
+    GPIO_Init(GPIOB, &gpio);
 
     usart3.USART_BaudRate = 115200;
     usart3.USART_WordLength = USART_WordLength_8b;
@@ -307,7 +302,7 @@ void USART3_Configuration(void)
     usart3.USART_Parity = USART_Parity_No;
     usart3.USART_Mode = USART_Mode_Tx|USART_Mode_Rx;
     usart3.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_Init(USART3,&usart3);
+    USART_Init(USART3, &usart3);
 
     USART_ITConfig(USART3,USART_IT_RXNE,ENABLE);
     USART_Cmd(USART3,ENABLE);
@@ -321,11 +316,9 @@ void USART3_Configuration(void)
 
 void USART3_proc(void)
 {
-    send_USART3("%s",USART3_RX_BUF);
-
     USART3_RX_STA = 0;
+    send_USART3("%s",USART3_RX_BUF);
     memset(USART3_RX_BUF,'\0',strlen((const char*)USART3_RX_BUF));
-    return;
 }
 
 void USART3_RECV_Timeout(void)

@@ -22,7 +22,7 @@
 #include "exti.h"
 #include "rtc.h"
 #include "gpio.h"
-#include "initstate.h"
+#include "device_state.h"
 #include "lcd12864.h"
 #include "usbh_usr.h"
 #include "fatfs_api.h"
@@ -47,7 +47,7 @@ static void SystemConfiguration(void)
     ads1258_Init();
     My_RTC_Init();		 		//≥ı ºªØRTC
     RTC_Set_WakeUp(RTC_WakeUpClock_CK_SPRE_16bits, 9);
-    RTC_Set_AlarmA(1,0,0,0);
+    RTC_Set_AlarmA(1, 0, 0, 0);
     lcd12864_GPIO_Init();
     LCD_Init();
     USB_Init();

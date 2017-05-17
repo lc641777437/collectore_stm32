@@ -10,10 +10,8 @@
 #include "string.h"
 #include "exfuns.h"
 
-extern u8 tcp_client_sendbuf[800];
-extern u8 tcp_client_flag;
-
 #define DeviceID *(vu32*)FALSH_SAVE_ADDR
+
 int ad_Data[16];
 static int ad_Data_Max[16];
 static int ad_Data_Min[16];
@@ -56,46 +54,27 @@ void ads1258_WriteRegister(u8 addr,u8 data)
 
 void ad_DataConvert(u8 result[4])
 {
-    ad_Data[result[0]-8]&=0x00000000;
-    ad_Data[result[0]-8]|=result[1];
-    ad_Data[result[0]-8]<<=8;
-    ad_Data[result[0]-8]|=result[2];
-    ad_Data[result[0]-8]<<=8;
-    ad_Data[result[0]-8]|=result[3];
-    if(ad_Data[result[0]-8]>ad_Data_Max[result[0]-8])
-        ad_Data_Max[result[0]-8]=ad_Data[result[0]-8];
-    if(ad_Data[result[0]-8]<ad_Data_Min[result[0]-8])
-        ad_Data_Min[result[0]-8]=ad_Data[result[0]-8];
-    ad_Data_Sum[result[0]-8]+=ad_Data[result[0]-8];
+    ad_Data[result[0]-8] &= 0x00000000;
+    ad_Data[result[0]-8] |= result[1];
+    ad_Data[result[0]-8] <<= 8;
+    ad_Data[result[0]-8] |= result[2];
+    ad_Data[result[0]-8] <<= 8;
+    ad_Data[result[0]-8] |= result[3];
+    if(ad_Data[result[0]-8] > ad_Data_Max[result[0]-8])
+    {
+        ad_Data_Max[result[0]-8] = ad_Data[result[0]-8];
+    }
+    if(ad_Data[result[0]-8] < ad_Data_Min[result[0]-8])
+    {
+        ad_Data_Min[result[0]-8] = ad_Data[result[0]-8];
+    }
+    ad_Data_Sum[result[0]-8] += ad_Data[result[0]-8];
     ad_Data_Num[result[0]-8]++;
 }
 
 void ads1258_ReadData(void)
 {
-    SPI_I2S_ITConfig(SPI2,SPI_I2S_IT_TXE,ENABLE);
-}
-
-void ad_Data_Proc(void)
-{/*
-    int n;
-    int avr;
-    char send_Data_Buf[100];
-    memset(tcp_client_sendbuf,'\0',strlen((char*)tcp_client_sendbuf));
-    for(n=0;n<16;n++)
-    {
-        avr=ad_Data_Sum[n]/ad_Data_Num[n];
-        snprintf((char*)send_Data_Buf,100,"%s%d%s%d%s%d%s%d\r\n","ID:",n,"MAX:",ad_Data_Max[n],"MIN:",ad_Data_Min[n],"AVR:",avr);
-        strcat((char*)tcp_client_sendbuf,send_Data_Buf);
-//        LOG_DEBUG("CHANNEL ID: %d\r\n",n);
-//        LOG_DEBUG("MAX: %d\r\n",ad_Data_Max[n]);
-//        LOG_DEBUG("MIN: %d\r\n",ad_Data_Min[n]);
-//        LOG_DEBUG("AVR: %d\r\n",avr);
-        ad_Data_Sum[n]=0;
-        ad_Data_Max[n]=0;
-        ad_Data_Min[n]=0x7FFFFF;
-        ad_Data_Num[n]=0;
-    }
-    tcp_client_flag|=1<<7;*/
+    SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE, ENABLE);
 }
 
 void convert_AD_RawData(void)
@@ -138,7 +117,6 @@ void Send_AD_RawData(u8 i)
 {
     USART_SendData(USART1, (uint8_t)SendBuf[i]);
 }
-
 
 void Save_AD_RawData_SD(void)
 {

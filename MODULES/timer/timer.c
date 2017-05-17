@@ -3,8 +3,7 @@
 #include "usart.h"
 #include "sys.h"
 #include "ads1258.h"
-#include "initstate.h"
-//#include "lwip_comm.h"
+#include "device_state.h"
 #include "usbh_usr.h"
 #include "fatfs_api.h"
 #include "lcd12864.h"
@@ -177,7 +176,7 @@ void TIM2_Init(void)//10us
     TIM_Cmd(TIM2,ENABLE);
 }
 
-void TIM2_IRQHandler(void)//10us
+void TIM2_IRQHandler(void)// 10us
 {
     static u8 LCDEN_TIME;
 	if(TIM_GetITStatus(TIM2,TIM_IT_Update)==SET) //Òç³öÖÐ¶Ï
@@ -191,8 +190,8 @@ void TIM2_IRQHandler(void)//10us
             time_10us=0;
             if(Sign_Flag==0)
             {
-                Sign_OUT=1;
-                START=1;
+                START = 1;
+                Sign_OUT = 1;
             }
             else
             {
@@ -217,7 +216,7 @@ void set_Frequent(int fre)
     sample_time = 100000/fre;
 }
 
-void TIM14_Init(void)//1s: for check the state of SD card and eth
+void TIM14_Init(void)// 1s, for check the state of SD card and eth
 {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -269,7 +268,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
     TIM_ClearITPendingBit(TIM14,TIM_IT_Update);
 }
 
-void TIM7_Init(void)//5ms
+void TIM7_Init(void) // 5ms
 {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;

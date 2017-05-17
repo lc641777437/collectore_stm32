@@ -3,7 +3,7 @@
 #include "usart.h"
 #include "fatfs_api.h"
 #include "exfuns.h"
-#include "initstate.h"
+#include "device_state.h"
 //////////////////////////////////////////////////////////////////////////////////
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK STM32F407开发板
@@ -264,8 +264,8 @@ u8 USH_User_App(void)
 
 void USB_Init(void)
 {
-    f_mount(fs[2],"2:",1); 	//挂载U盘
-    USBH_Init(&USB_OTG_Core,USB_OTG_FS_CORE_ID,&USB_Host,&USBH_MSC_cb,&USR_Callbacks);
+    f_mount(fs[2], "2:", 1); 	//挂载U盘
+    USBH_Init(&USB_OTG_Core, USB_OTG_FS_CORE_ID, &USB_Host, &USBH_MSC_cb, &USR_Callbacks);
 }
 
 

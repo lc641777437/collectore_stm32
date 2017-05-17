@@ -36,7 +36,6 @@
 #define CTRL_1 PGout(2)
 #define CTRL_0 PDout(15)
 
-
 void GPIO_init(void);
 
 #endif

@@ -1,4 +1,4 @@
-#include "initstate.h"
+#include "device_state.h"
 
 DEVICE_STATE sd_card = OFF;
 DEVICE_STATE eth_host = OFF;

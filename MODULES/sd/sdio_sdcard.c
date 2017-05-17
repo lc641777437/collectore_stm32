@@ -6,7 +6,7 @@
 #include "usart.h"
 #include "malloc.h"
 #include "fatfs_api.h"
-#include "initstate.h"
+#include "device_state.h"
 #include "timer.h"
 
 

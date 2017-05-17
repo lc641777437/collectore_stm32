@@ -5,7 +5,7 @@
 #include "malloc.h"
 #include "ff.h"
 #include "delay.h"
-#include "initstate.h"
+#include "device_state.h"
 
 //为磁盘注册工作区
 //path:磁盘路径，比如"0:"、"1:"
