@@ -252,11 +252,11 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
         else
         {
             time_s=0;
-            if(get_InitState(SDSTATE)==FATFS_OK)
+            if(get_DeviceState(DEVICE_SD) == ON && get_DeviceState(DEVICE_FATFS) == ON)
             {
-                if(SD_GetState()==SD_CARD_ERROR)
+                if(SD_GetState() == SD_CARD_ERROR)
                 {
-                    reset_InitState(SDSTATE);
+                    reset_DeviceState(DEVICE_SD);
                     LOG_DEBUG("SD LOST\r\n");
                 }
             }
@@ -264,11 +264,6 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
             {
                 SD_Card_Init();
             }
-            /*
-            if(get_InitState(ETHSTATE)!= TCP_OK)
-            {
-                LWIP_Init();
-            }*/
         }
     }
     TIM_ClearITPendingBit(TIM14,TIM_IT_Update);

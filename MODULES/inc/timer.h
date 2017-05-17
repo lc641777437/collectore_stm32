@@ -12,10 +12,6 @@
 #define SDCARD_OK 1
 #define FATFS_OK 2
 
-#define LWIP_OK 1
-#define DHCP_OK 2
-#define TCP_OK 3
-
 #define USB_OK 1
 
 void TIM_Init(void);
@@ -31,7 +27,7 @@ void set_Frequent(int fre);
 
 void TIM7_Init(void);
 void TIM7_Enable(u8 state);
-		 
+
 #endif
 
 

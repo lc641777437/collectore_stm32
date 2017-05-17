@@ -12,23 +12,23 @@
 static u8 printf_state;
 static u8 data_Count;
 
-static u16 USART3_RX_STA = 0;//接收状态标记    
-static u16 USART1_RX_STA = 0;//接收状态标记    
+static u16 USART3_RX_STA = 0;//接收状态标记
+static u16 USART1_RX_STA = 0;//接收状态标记
 static u16 USART2_RX_STA = 0;//接收状态标记
 
-static u8 USART1_RX_BUF[USART_MAX_RECV_LEN];    
+static u8 USART1_RX_BUF[USART_MAX_RECV_LEN];
 static u8 USART2_RX_BUF[USART_MAX_RECV_LEN];
-static u8 USART3_RX_BUF[USART_MAX_RECV_LEN];    
+static u8 USART3_RX_BUF[USART_MAX_RECV_LEN];
 
 
-#pragma import(__use_no_semihosting)             
-               
-struct __FILE 
-{ 
-	int handle; 
-}; 
+#pragma import(__use_no_semihosting)
 
-FILE __stdout;       
+struct __FILE
+{
+	int handle;
+};
+
+FILE __stdout;
 
 //重定义fputc函数
 int fputc(int ch, FILE *f)
@@ -39,12 +39,12 @@ int fputc(int ch, FILE *f)
             while(USART_GetFlagStatus(USART1,USART_FLAG_TC) == RESET);
             USART_SendData(USART1, (uint8_t)ch);
             break;
-        
-        case 2:  		
+
+        case 2:
             while (USART_GetFlagStatus(USART2,USART_FLAG_TC) == RESET);
             USART_SendData(USART2, (uint8_t)ch);
             break;
-        
+
         case 3:
             while (USART_GetFlagStatus(USART3,USART_FLAG_TC) == RESET);
             USART_SendData(USART3, (uint8_t)ch);
@@ -69,7 +69,7 @@ void USART1_Configuration(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
 
     GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_USART1);
-    GPIO_PinAFConfig(GPIOB,GPIO_PinSource7,GPIO_AF_USART1); 
+    GPIO_PinAFConfig(GPIOB,GPIO_PinSource7,GPIO_AF_USART1);
 
     gpio.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
     gpio.GPIO_Mode = GPIO_Mode_AF;
@@ -100,7 +100,7 @@ void USART1_proc()
 {
     char command[20];
     int data;
-	
+
     if(strstr((char *)USART1_RX_BUF, "SampleRate:"))
     {
         sscanf((const char*)&USART1_RX_BUF,"%11s%d",command,&data);
@@ -125,7 +125,7 @@ void USART1_proc()
     {
         sscanf((const char*)&USART1_RX_BUF,"%12s%d",command,&data);
         Write_IPAddress(data);
-        reset_InitState(ETHSTATE);
+        set_DeviceState(DEVICE_ETH);
         LOG_DEBUG("Set remote IP OK\r\n");
     }
     if(strstr((char *)USART1_RX_BUF, "StartToSend"))
@@ -151,7 +151,7 @@ void USART1_IRQHandler(void)
         USART_ClearITPendingBit(USART1,USART_IT_RXNE);
 
 		res = USART_ReceiveData(USART1);//(USART1->DR);	//读取接收到的数据
-		
+
         if(USART1_RX_STA & 0x4000)      //之前接收到了0x0d
         {
             USART1_RX_STA = 0;
@@ -161,16 +161,16 @@ void USART1_IRQHandler(void)
             }
         }
         else                            //之前还没收到0X0d
-        {	
+        {
             if(res == 0x0d)
                 USART1_RX_STA |= 0x4000;
             else
             {
                 USART1_RX_BUF[USART1_RX_STA++ & 0X3FFF] = res;
                 if(USART1_RX_STA > (USART_MAX_RECV_LEN - 1))
-                    USART1_RX_STA = 0;  //接收数据错误,重新开始接收	  
-            }		 
-        }	  		 
+                    USART1_RX_STA = 0;  //接收数据错误,重新开始接收
+            }
+        }
     }
     if( USART_GetITStatus(USART1, USART_IT_TXE) == SET  )
     {
@@ -202,7 +202,7 @@ void USART2_Configuration(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
 
     GPIO_PinAFConfig(GPIOD,GPIO_PinSource5,GPIO_AF_USART2);
-    GPIO_PinAFConfig(GPIOD,GPIO_PinSource6,GPIO_AF_USART2); 
+    GPIO_PinAFConfig(GPIOD,GPIO_PinSource6,GPIO_AF_USART2);
 
     gpio.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6;
     gpio.GPIO_Mode = GPIO_Mode_AF;
@@ -228,7 +228,7 @@ void USART2_Configuration(void)
     nvic.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic);
 }
-void USART2_proc()    
+void USART2_proc()
 {
     send_USART2("%s",USART2_RX_BUF);
     USART2_RX_STA = 0;
@@ -244,13 +244,13 @@ void USART2_RECV_Timeout(void)
 void USART2_IRQHandler(void)
 {
     u8 res;
- 
+
     if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
 	{
         USART_ClearITPendingBit(USART2,USART_IT_RXNE);
 
 		res = USART_ReceiveData(USART2);//(USART2->DR);	//读取接收到的数据
-		
+
 
         if(USART2_RX_STA & 0x4000)      //之前接收到了0x0d
         {
@@ -262,7 +262,7 @@ void USART2_IRQHandler(void)
             }
         }
         else                            //之前还没收到0X0d
-        {	
+        {
             if(res == 0x0d)
                 USART2_RX_STA |= 0x4000;
             else
@@ -270,9 +270,9 @@ void USART2_IRQHandler(void)
 				TIM4_set(1);
                 USART2_RX_BUF[USART2_RX_STA++ & 0X3FFF] = res;
                 if(USART2_RX_STA > (USART_MAX_RECV_LEN - 1))
-                    USART2_RX_STA = 0;  //接收数据错误,重新开始接收	  
-            }		 
-        }	  		 
+                    USART2_RX_STA = 0;  //接收数据错误,重新开始接收
+            }
+        }
     }
 }
 
@@ -292,7 +292,7 @@ void USART3_Configuration(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,ENABLE);
 
     GPIO_PinAFConfig(GPIOB,GPIO_PinSource10,GPIO_AF_USART3);
-    GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_USART3); 
+    GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_USART3);
 
     gpio.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
     gpio.GPIO_Mode = GPIO_Mode_AF;
@@ -322,7 +322,7 @@ void USART3_Configuration(void)
 void USART3_proc(void)
 {
     send_USART3("%s",USART3_RX_BUF);
-    
+
     USART3_RX_STA = 0;
     memset(USART3_RX_BUF,'\0',strlen((const char*)USART3_RX_BUF));
     return;
@@ -336,13 +336,13 @@ void USART3_RECV_Timeout(void)
 void USART3_IRQHandler(void)
 {
     u8 res;
- 
+
     if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
 	{
         USART_ClearITPendingBit(USART3,USART_IT_RXNE);
 
 		res = USART_ReceiveData(USART3);//(USART3->DR);	//读取接收到的数据
-		
+
         if(USART3_RX_STA & 0x4000)      //之前接收到了0x0d
         {
             USART3_RX_STA = 0;
@@ -353,7 +353,7 @@ void USART3_IRQHandler(void)
             }
         }
         else                            //之前还没收到0X0d
-        {	
+        {
             if(res == 0x0d)
                 USART3_RX_STA |= 0x4000;
             else
@@ -361,9 +361,9 @@ void USART3_IRQHandler(void)
                 TIM3_set(1);
                 USART3_RX_BUF[USART3_RX_STA++ & 0X3FFF] = res;
                 if(USART3_RX_STA > (USART_MAX_RECV_LEN - 1))
-                    USART3_RX_STA = 0;  //接收数据错误,重新开始接收	  
-            }		 
-        }	  		 
+                    USART3_RX_STA = 0;  //接收数据错误,重新开始接收
+            }
+        }
     }
 }
 
