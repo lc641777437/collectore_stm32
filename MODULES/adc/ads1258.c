@@ -11,7 +11,7 @@
 #include "exfuns.h"
 
 extern u8 tcp_client_sendbuf[800];
-extern u8 tcp_client_flag;	
+extern u8 tcp_client_flag;
 
 #define DeviceID *(vu32*)FALSH_SAVE_ADDR
 int ad_Data[16];
@@ -23,7 +23,7 @@ static long int ad_Data_Num[16];
 static u8 SendBuf[53];
 int Date_Now_SD;
 int Date_Now_USB;
-int SavePosition;  //1 for SD 2 for USB
+int SavePosition;  // 1 for SD 2 for USB
 char FileName[30];
 
 void ads1258_Init(void)
@@ -35,7 +35,7 @@ void ads1258_Init(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
     PBout(12)=0;
-    
+
     EXTI_Configuration();
     EXTI_Sign_Configuration();
     SPI2_Init();
@@ -76,7 +76,7 @@ void ads1258_ReadData(void)
 }
 
 void ad_Data_Proc(void)
-{
+{/*
     int n;
     int avr;
     char send_Data_Buf[100];
@@ -95,7 +95,7 @@ void ad_Data_Proc(void)
         ad_Data_Min[n]=0x7FFFFF;
         ad_Data_Num[n]=0;
     }
-    tcp_client_flag|=1<<7;
+    tcp_client_flag|=1<<7;*/
 }
 
 void convert_AD_RawData(void)

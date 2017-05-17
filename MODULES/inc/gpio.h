@@ -1,7 +1,7 @@
 #ifndef __GPIO_H
 #define __GPIO_H
 #include "stm32f4xx.h"
-   							
+
 #define STATE_15 PFin(2)
 #define STATE_14 PFin(1)
 #define STATE_13 PFin(0)
@@ -38,5 +38,5 @@
 
 
 void GPIO_init(void);
-		 
+
 #endif
