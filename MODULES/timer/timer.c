@@ -4,7 +4,7 @@
 #include "sys.h"
 #include "ads1258.h"
 #include "initstate.h"
-#include "lwip_comm.h"
+//#include "lwip_comm.h"
 #include "usbh_usr.h"
 #include "fatfs_api.h"
 #include "lcd12864.h"
