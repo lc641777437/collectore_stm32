@@ -13,7 +13,7 @@ static int send_Flag = 0;
 
 void set_Save_Flag(int i)
 {
-    save_Flag=i;
+    save_Flag = i;
 }
 
 int get_Save_Flag(void)
@@ -23,7 +23,7 @@ int get_Save_Flag(void)
 
 void set_Send_Flag(int i)
 {
-    send_Flag=i;
+    send_Flag = i;
 }
 
 int get_Send_Flag(void)
@@ -108,7 +108,7 @@ void EXTI9_5_IRQHandler(void)
                 convert_AD_RawData();
                 if(get_Send_Flag())
                 {
-                    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+                    Send_AD_RawData();
                 }
                 set_Save_Flag(1);
             }

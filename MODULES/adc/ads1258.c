@@ -11,6 +11,7 @@
 #include "exfuns.h"
 
 #define DeviceID *(vu32*)FALSH_SAVE_ADDR
+#define ADS1258_DATA_LEN (52)
 
 int ad_Data[16];
 static int ad_Data_Max[16];
@@ -18,7 +19,7 @@ static int ad_Data_Min[16];
 static long long int ad_Data_Sum[16];
 static long int ad_Data_Num[16];
 //static u8 ad_State[16];
-static u8 SendBuf[53];
+static u8 SendBuf[ADS1258_DATA_LEN + 1];
 int Date_Now_SD;
 int Date_Now_USB;
 int SavePosition;  // 1 for SD 2 for USB
@@ -113,9 +114,9 @@ void convert_AD_RawData(void)
     }
 }
 
-void Send_AD_RawData(u8 i)
+void Send_AD_RawData(void)
 {
-    USART_SendData(USART1, (uint8_t)SendBuf[i]);
+    USART1_Send_Bytes(SendBuf, ADS1258_DATA_LEN);
 }
 
 void Save_AD_RawData_SD(void)

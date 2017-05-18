@@ -17,7 +17,15 @@ static u16 USART1_RX_STA = 0;//接收状态标记
 static u16 USART2_RX_STA = 0;//接收状态标记
 
 static u8 USART1_RX_BUF[USART_MAX_RECV_LEN];
+static u8 USART1_TX_BUF[USART_MAX_RECV_LEN];
+static u8  USART1_TX_flag = 0;
+static u32 USART1_TX_ptr_in  = 0;
+static u32 USART1_TX_ptr_out = 0;
+static u32 USART1_TX_length  = 0;
+
 static u8 USART2_RX_BUF[USART_MAX_RECV_LEN];
+static u8 USART2_Tx_BUF[USART_MAX_RECV_LEN];
+
 static u8 USART3_RX_BUF[USART_MAX_RECV_LEN];
 
 
@@ -175,6 +183,28 @@ void USART1_IRQHandler(void)
 
     if( USART_GetITStatus(USART1, USART_IT_TXE) == SET )
     {
+
+        if(USART1_TX_length > 0)
+        {
+            USART_SendData(USART1, USART1_TX_BUF[USART1_TX_ptr_out]);
+            USART1_TX_ptr_out++;
+            USART1_TX_length--;
+
+            if(USART1_TX_length == 0)
+            {
+                USART_ITConfig(USART1, USART_IT_TXE, DISABLE);//close the Tx interrupt
+            }
+
+            if(USART1_TX_ptr_out == USART_MAX_RECV_LEN)// To avoid buffer overflow
+            {
+                USART1_TX_ptr_out = 0;
+            }
+        }
+        else
+        {
+            USART_ITConfig(USART1, USART_IT_TXE, DISABLE);//close the Tx interrupt
+        }
+/*
         if( data_Count > 51 )
         {
             data_Count = 0;
@@ -185,10 +215,37 @@ void USART1_IRQHandler(void)
             Send_AD_RawData(data_Count);
             data_Count++;
         }
+*/
     }
 }
 
+static void USART1_Send_Byte(u8 data)
+{
+	while(USART1_TX_length >= USART_MAX_RECV_LEN - 2)//avoid overflow
+	{
+		USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+	}
 
+	USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+	USART1_TX_BUF[USART1_TX_ptr_in] = data;
+	USART1_TX_ptr_in++;
+	USART1_TX_length++;
+
+	if(USART1_TX_ptr_in == USART_MAX_RECV_LEN)// avoid overflow
+	{
+		USART1_TX_ptr_in = 0;
+	}
+
+	USART_ITConfig(USART1, USART_IT_TXE, ENABLE);//open the Tx interrupt
+}
+
+void USART1_Send_Bytes(u8 *data,int length)
+{
+	for(int i = 0; i < length; i++)
+	{
+        USART1_Send_Byte(*(data + i));
+	}
+}
 
 void USART2_Configuration(void)
 {

@@ -39,7 +39,7 @@ void reset_DeviceState(DEVICE device)
 
 DEVICE_STATE get_DeviceState(DEVICE device)
 {
-    DEVICE_STATE state = DEVICE_NULL;
+    DEVICE_STATE state = OFF;
 
     if(device == DEVICE_SD)
     {
